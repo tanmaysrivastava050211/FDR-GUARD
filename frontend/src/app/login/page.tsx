@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { 
   ShieldCheck, Building2, Lock, Mail, 
@@ -14,6 +14,14 @@ import {
 function LoginContent() {
   const { user, login, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") || searchParams.get("portal");
+
+  // Unified Form state
+  const isInitialInstitution = tabParam === "institution" || tabParam === "institute";
+  const [identifier, setIdentifier] = useState(isInitialInstitution ? "delhi@college.edu.in" : "admin@aicte.india.org");
+  const [password, setPassword] = useState("demo123");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -25,10 +33,13 @@ function LoginContent() {
     }
   }, [user, isLoading, router]);
 
-  // Unified Form state
-  const [identifier, setIdentifier] = useState("admin@aicte.india.org");
-  const [password, setPassword] = useState("demo123");
-  const [showPassword, setShowPassword] = useState(false);
+  useEffect(() => {
+    if (tabParam === "institution" || tabParam === "institute") {
+      setIdentifier("delhi@college.edu.in");
+    } else if (tabParam === "admin" || tabParam === "aicte") {
+      setIdentifier("admin@aicte.india.org");
+    }
+  }, [tabParam]);
 
   // CAPTCHA simulation (NIC standard requirement)
   const [captchaCode, setCaptchaCode] = useState("8N4K9");
@@ -127,20 +138,46 @@ function LoginContent() {
           </p>
         </div>
 
-        {/* Dynamic Route Detector Pill */}
-        <div className="px-6 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs font-semibold">
-          <span className="text-slate-600">Portal Destination:</span>
-          {isAdminDomain ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-300 font-bold font-mono text-[11px]">
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-800" />
-              AICTE Directorate Admin Portal
+        {/* Interactive Portal Switcher */}
+        <div className="p-3 bg-slate-100 border-b border-slate-200">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 mb-2">
+            <span>Select Signing Portal:</span>
+            <span className="font-mono text-slate-500">
+              {isAdminDomain ? "AICTE Scrutiny Domain" : "Institutional Campus Domain"}
             </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold font-mono text-[11px]">
-              <Building2 className="w-3.5 h-3.5 text-emerald-800" />
-              Technical Institution Desk
-            </span>
-          )}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setIdentifier("admin@aicte.india.org");
+                setError(null);
+              }}
+              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                isAdminDomain
+                  ? "bg-[#0c2340] text-white shadow-xs border-2 border-[#0c2340]"
+                  : "bg-white text-slate-700 hover:bg-slate-50 border-2 border-slate-300"
+              }`}
+            >
+              <ShieldCheck className={`w-4 h-4 ${isAdminDomain ? "text-amber-400" : "text-slate-500"}`} />
+              <span>AICTE Directorate Desk</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIdentifier("delhi@college.edu.in");
+                setError(null);
+              }}
+              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                !isAdminDomain
+                  ? "bg-[#166534] text-white shadow-xs border-2 border-[#166534]"
+                  : "bg-white text-slate-700 hover:bg-slate-50 border-2 border-slate-300"
+              }`}
+            >
+              <Building2 className={`w-4 h-4 ${!isAdminDomain ? "text-emerald-200" : "text-slate-500"}`} />
+              <span>Technical Institution Desk</span>
+            </button>
+          </div>
         </div>
 
         {/* Login Form */}

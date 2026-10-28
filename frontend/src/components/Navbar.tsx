@@ -56,7 +56,7 @@ export const Navbar = () => {
   const handleSignOut = () => {
     logout();
     window.scrollTo({ top: 0, behavior: "smooth" });
-    router.push("/login");
+    router.push("/");
   };
 
   const handleNavClick = () => {

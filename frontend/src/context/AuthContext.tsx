@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem("fdr_auth_user");
     localStorage.removeItem("fdr_auth_token");
-    router.push("/login");
+    router.push("/");
   };
 
   return (
